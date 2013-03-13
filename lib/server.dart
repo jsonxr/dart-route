@@ -16,6 +16,8 @@ import 'url_pattern.dart';
 export 'url_pattern.dart';
 import 'pattern.dart';
 
+import 'http_request.dart' as my;
+
 typedef Future<bool> Filter(HttpRequest request);
 
 /**
@@ -35,7 +37,7 @@ typedef Future<bool> Filter(HttpRequest request);
  * Requests not matched by a call to [serve] are sent to the [defaultStream].
  * If there's no subscriber to the defaultStream then a 404 is sent to the
  * response.
- * 
+ *
  * Example:
  *     import 'package:route/server.dart';
  *     import 'package:route/pattern.dart';
@@ -50,15 +52,15 @@ typedef Future<bool> Filter(HttpRequest request);
  */
 class Router {
   final Stream<HttpRequest> _incoming;
-  
-  final Map<Pattern, StreamController> _controllers = 
+
+  final Map<Pattern, StreamController> _controllers =
       new LinkedHashMap<Pattern, StreamController>();
-      
+
   final Map<Pattern, Filter> _filters = new LinkedHashMap<Pattern, Filter>();
-  
-  final StreamController<HttpRequest> _defaultController = 
+
+  final StreamController<HttpRequest> _defaultController =
       new StreamController<HttpRequest>();
-  
+
   /**
    * Create a new Router that listens to the [incoming] stream, usually an
    * instance of [HttpServer].
@@ -90,8 +92,9 @@ class Router {
   }
 
   Stream<HttpRequest> get defaultStream => _defaultController.stream;
-  
-  void _handleRequest(HttpRequest req) {
+
+  void _handleRequest(HttpRequest request) {
+    my.HttpRequest req = new my.HttpRequest(request);
     bool cont = true;
     doWhile(_filters.keys, (Pattern pattern) {
       if (matchesFull(pattern, req.uri.path)) {
